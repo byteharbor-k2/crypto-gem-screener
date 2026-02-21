@@ -16,6 +16,7 @@ def _read_key(service: str, env_var: str = "") -> str:
 COINGECKO_KEY = _read_key("coingecko", "COINGECKO_API_KEY")
 ETHERSCAN_KEY = _read_key("etherscan", "ETHERSCAN_API_KEY")
 DUNE_KEY = _read_key("dune", "DUNE_API_KEY")
+ROOTDATA_KEY = _read_key("rootdata", "ROOTDATA_API_KEY")
 
 # Rate limits
 CG_DELAY = 2.2        # seconds between CoinGecko requests (30/min with demo key)
@@ -31,3 +32,8 @@ CIRC_RATIO_HARD_MIN = 0.50  # 50% hard floor (red flag below this)
 
 # Categories to exclude (not investable protocols)
 EXCLUDE_CATEGORIES = {"CEX", "Chain", "Bridge", "Canonical Bridge"}
+
+# Three-layer scoring weights (must sum to 100)
+ROOTDATA_WEIGHT = 35
+MARKET_WEIGHT = 35
+ONCHAIN_WEIGHT = 30

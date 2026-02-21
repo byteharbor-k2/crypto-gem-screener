@@ -3,7 +3,7 @@ import asyncio
 import sys
 import httpx
 from . import config
-from .data_sources import defillama, coingecko, etherscan
+from .data_sources import defillama, coingecko, etherscan, rootdata
 from .phases import phase1_macro, phase2_value, phase3_token, phase4_eco
 from . import red_flags, scorer, reporter
 
@@ -76,6 +76,10 @@ async def main():
         print(f"  After circulation filter (≥70%): {len(candidates)} (dropped {pre_circ - len(candidates)})")
         after_filter = len(candidates)
 
+        # ─── RootData enrichment (fundamental layer) ───
+        print("\n📊 RootData enrichment...")
+        candidates, rootdata_enabled = await rootdata.enrich_protocols(client, candidates)
+
         # ─── Phase IV: Ecosystem ───
         print("\n📊 Phase IV: Ecosystem validation...")
         candidates = phase4_eco.analyze(candidates, dex_volumes)
@@ -88,7 +92,7 @@ async def main():
 
         # ─── Score & rank ───
         print("\n⭐ Scoring & ranking...")
-        ranked = scorer.rank(passed)
+        ranked = scorer.rank(passed, rootdata_enabled=rootdata_enabled)
 
         # ─── Report ───
         print("\n" + "=" * 50)

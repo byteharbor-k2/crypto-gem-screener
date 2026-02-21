@@ -31,6 +31,12 @@ class Protocol:
     contract_address: str = ""
     contract_verified: bool | None = None
     recent_tx_count: int = 0
+    # RootData
+    rootdata_id: int | None = None
+    rootdata_total_funding: float = 0.0
+    rootdata_investor_count: int = 0
+    rootdata_investor_names: list[str] = field(default_factory=list)
+    rootdata_tags: list[str] = field(default_factory=list)
     # Emissions / Unlocks
     has_upcoming_unlock: bool | None = None  # True if >5% unlock in 6 months
     unlock_detail: str = ""
@@ -38,6 +44,10 @@ class Protocol:
     score: int = 0
     red_flags: list[str] = field(default_factory=list)
     score_breakdown: dict = field(default_factory=dict)
+    layer_reasons: dict[str, str] = field(default_factory=dict)
+    rootdata_score: int = 0
+    market_score: int = 0
+    onchain_score: int = 0
     # Computed
     pe: float | None = None   # MCap / Annualized Revenue
     pb: float | None = None   # MCap / TVL

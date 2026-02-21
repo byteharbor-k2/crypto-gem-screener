@@ -91,8 +91,14 @@ def generate(
             # Score breakdown
             bd = p.score_breakdown
             if bd:
-                parts = [f"{k}={v}" for k, v in bd.items() if v > 0]
-                lines.append(f"   📊 {' + '.join(parts)}")
+                lines.append(
+                    f"   📊 Layers: rootdata={bd.get('rootdata', 0)} + market={bd.get('market', 0)} + onchain={bd.get('onchain', 0)}"
+                )
+                reasons = p.layer_reasons
+                if reasons:
+                    lines.append(f"   🧠 RootData: {reasons.get('rootdata', '—')}")
+                    lines.append(f"   🧠 Market: {reasons.get('market', '—')}")
+                    lines.append(f"   🧠 On-chain: {reasons.get('onchain', '—')}")
 
     lines.append("")
     lines.append("━" * 35)
@@ -117,7 +123,7 @@ def generate_extended_table(ranked: list[Protocol], limit: int = 10) -> str:
     """Generate extended top-N table."""
     lines = []
     lines.append(f"\n📋 Extended Top {limit}:")
-    header = f"{'#':<3}{'Name':<22}{'Pts':<5}{'MCap':>9}{'TVL':>10}{'P/B':>6}{'P/E':>7}{'Circ':>6}{'Rev30d':>9}"
+    header = f"{'#':<3}{'Name':<22}{'Pts':<5}{'R':>4}{'M':>4}{'O':>4}{'MCap':>9}{'TVL':>10}{'P/B':>6}{'P/E':>7}{'Circ':>6}{'Rev30d':>9}"
     lines.append(header)
     lines.append("─" * len(header))
     for i, p in enumerate(ranked[:limit]):
@@ -127,5 +133,7 @@ def generate_extended_table(ranked: list[Protocol], limit: int = 10) -> str:
         mcap = f"${p.mcap/1e6:.1f}M" if p.mcap else "—"
         tvl = f"${p.tvl/1e6:.1f}M" if p.tvl else "—"
         rev = f"${p.rev_30d/1e3:.0f}K" if p.rev_30d else "$0"
-        lines.append(f"{i+1:<3}{p.name:<22}{p.score:<5}{mcap:>9}{tvl:>10}{pb:>6}{pe:>7}{circ:>6}{rev:>9}")
+        lines.append(
+            f"{i+1:<3}{p.name:<22}{p.score:<5}{p.rootdata_score:>4}{p.market_score:>4}{p.onchain_score:>4}{mcap:>9}{tvl:>10}{pb:>6}{pe:>7}{circ:>6}{rev:>9}"
+        )
     return "\n".join(lines)

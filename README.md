@@ -44,15 +44,15 @@ The screener runs a VC-style pipeline, filtering ~2000 protocols down to the top
 
 ### Scoring Model (100 points)
 
-| Dimension | Weight | Logic |
-|-----------|--------|-------|
-| P/B (deep value) | 25 | <0.5 → 25, <1 → 20, <3 → 10 |
-| P/E (earnings) | 20 | <10 → 20, <20 → 15, <50 → 10 |
-| Circulation | 15 | >80% → 15, >70% → 12 |
-| 30d Revenue | 15 | >$500K → 15, >$100K → 10 |
-| TVL & Trend | 10 | TVL>$50M + growing → 10 |
-| On-chain Activity | 10 | Active contract → 10 |
-| No Red Flags | 5 | Clean → 5 |
+Three-layer weighted model (configurable in `config.py`):
+
+| Layer | Weight | Key Signals |
+|------|--------|-------------|
+| Fundamental (RootData) | 35 | Funding size, investor breadth, narrative tags |
+| Market (CoinGecko + valuation) | 35 | P/B, P/E, circulation ratio, 30d revenue |
+| On-chain (Etherscan + DeFiLlama) | 30 | Contract activity, TVL scale/trend, verification, clean profile |
+
+If `ROOTDATA_API_KEY` is missing or RootData is unavailable, the screener auto-falls back to a 2-layer model and re-normalizes active weights to keep total score at 100.
 
 ### Data Sources
 
@@ -61,6 +61,7 @@ The screener runs a VC-style pipeline, filtering ~2000 protocols down to the top
 | [DeFiLlama](https://defillama.com/) | TVL, fees, revenue, DEX volume, stablecoins | Free, no key |
 | [CoinGecko](https://www.coingecko.com/) | Market cap, FDV, circulating supply | Free demo key |
 | [Etherscan](https://etherscan.io/) | Contract verification, tx activity | Free key |
+| [RootData](https://www.rootdata.com/Api) | Project metadata, funding rounds, investor coverage | API key required |
 | [Alternative.me](https://alternative.me/) | Fear & Greed Index | Free, no key |
 
 ### Quick Start
@@ -74,13 +75,15 @@ cd crypto-gem-screener
 uv sync
 
 # Set API keys
-mkdir -p ~/.config/coingecko ~/.config/etherscan
+mkdir -p ~/.config/coingecko ~/.config/etherscan ~/.config/rootdata
 echo "YOUR_COINGECKO_KEY" > ~/.config/coingecko/api_key
 echo "YOUR_ETHERSCAN_KEY" > ~/.config/etherscan/api_key
+echo "YOUR_ROOTDATA_KEY" > ~/.config/rootdata/api_key
 
 # Or use environment variables
 export COINGECKO_API_KEY="your-key"
 export ETHERSCAN_API_KEY="your-key"
+export ROOTDATA_API_KEY="your-key"
 
 # Run
 uv run python -m gem_screener
@@ -165,15 +168,15 @@ CIRC_RATIO_MIN = 0.70            # 70% minimum circulation
 
 ### 评分模型（满分 100）
 
-| 维度 | 权重 | 逻辑 |
-|------|------|------|
-| P/B（深度价值） | 25分 | <0.5 → 25, <1 → 20, <3 → 10 |
-| P/E（收入估值） | 20分 | <10 → 20, <20 → 15, <50 → 10 |
-| 流通率 | 15分 | >80% → 15, >70% → 12 |
-| 30天收入 | 15分 | >$500K → 15, >$100K → 10 |
-| TVL 及趋势 | 10分 | TVL>$50M + 增长 → 10 |
-| 链上活跃度 | 10分 | 合约活跃 → 10 |
-| 无红线 | 5分 | 通过全部检查 → 5 |
+采用三层加权模型（可在 `config.py` 调整）：
+
+| 层级 | 权重 | 关键因子 |
+|------|------|---------|
+| 基本面层（RootData） | 35分 | 融资规模、投资方覆盖、叙事标签 |
+| 市场层（CoinGecko + 估值） | 35分 | P/B、P/E、流通率、30天收入 |
+| 链上层（Etherscan + DeFiLlama） | 30分 | 合约活跃度、TVL规模/趋势、验证状态、红线清洁度 |
+
+若未配置 `ROOTDATA_API_KEY` 或 RootData 临时不可用，系统会自动降级为双层模型，并对剩余层级权重重新归一化，总分仍保持 100。
 
 ### 数据源
 
@@ -182,6 +185,7 @@ CIRC_RATIO_MIN = 0.70            # 70% minimum circulation
 | [DeFiLlama](https://defillama.com/) | TVL、费用、收入、DEX交易量、稳定币 | 免费，无需 key |
 | [CoinGecko](https://www.coingecko.com/) | 市值、FDV、流通量 | 免费 demo key |
 | [Etherscan](https://etherscan.io/) | 合约验证、交易活跃度 | 免费 key |
+| [RootData](https://www.rootdata.com/Api) | 项目资料、融资信息、投资方覆盖 | 需要 API key |
 | [Alternative.me](https://alternative.me/) | 恐惧贪婪指数 | 免费，无需 key |
 
 ### 快速开始
@@ -202,6 +206,7 @@ echo "你的_ETHERSCAN_KEY" > ~/.config/etherscan/api_key
 # 或使用环境变量
 export COINGECKO_API_KEY="your-key"
 export ETHERSCAN_API_KEY="your-key"
+export ROOTDATA_API_KEY="your-key"
 
 # 运行
 uv run python -m gem_screener
