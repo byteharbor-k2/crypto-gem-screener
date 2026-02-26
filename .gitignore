@@ -1,8 +1,29 @@
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual env / packaging
 .venv/
 *.egg-info/
 dist/
 build/
+
+# Runtime logs / outputs
 runs.log
+reports/
+output/
+outputs/
+data/
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# Tooling / editor
 .python-version
+.DS_Store
+.vscode/
+.idea/
